@@ -57,6 +57,24 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = Number(process.env.PORT || 3000);
+
+// Seed the sample catalog on first boot when the products table is empty
+// (e.g. a fresh Railway volume). Safe to run on every start.
+try {
+  const { db } = require('./db');
+  const row = db.prepare('SELECT COUNT(*) AS c FROM products').get();
+  if (row && row.c === 0) {
+    console.log('products table is empty — running seed script…');
+    require('child_process').execFileSync(
+      process.execPath,
+      [require('path').join(__dirname, '..', 'scripts', 'seed.js')],
+      { stdio: 'inherit', env: process.env }
+    );
+  }
+} catch (e) {
+  console.error('auto-seed skipped/failed:', e.message);
+}
+
 app.listen(PORT, () => {
   console.log(`tg-minishop backend listening on :${PORT} (mock payments: ${process.env.PAYWAY_MOCK === 'true'})`);
 });

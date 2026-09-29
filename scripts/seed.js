@@ -30,7 +30,8 @@ try {
 }
 
 const FORCE = process.argv.includes('--force');
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'data', 'shop.db');
+const DB_PATH = process.env.DB_PATH ||
+  path.join(process.env.DATA_DIR || path.join(__dirname, '..', 'data'), 'shop.db');
 const SAMPLE_MARKER = '(Sample listing — replace before going live.)';
 
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
