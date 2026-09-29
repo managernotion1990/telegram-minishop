@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#17212b" />
+  <title>MiniShop</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header id="header">
+      <div class="brand">🛍️ MiniShop</div>
+      <button id="cart-btn" class="icon-btn" aria-label="Open cart">
+        🧺
+        <span id="cart-badge" class="badge hidden">0</span>
+      </button>
+    </header>
+
+    <!-- SHOP VIEW -->
+    <main id="view-shop" class="view">
+      <div class="search-bar">
+        <input id="search-input" type="search" placeholder="Search products…" autocomplete="off" />
+      </div>
+      <div id="category-chips" class="chips"></div>
+      <div id="product-grid" class="grid">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </main>
+
+    <!-- CART VIEW -->
+    <main id="view-cart" class="view hidden">
+      <h2 class="view-title">Your cart</h2>
+      <div id="cart-items"></div>
+      <div id="cart-summary" class="summary hidden">
+        <div class="summary-row"><span>Subtotal</span><span id="cart-subtotal-usd"></span></div>
+        <div class="summary-row muted"><span>≈ in KHR</span><span id="cart-subtotal-khr"></span></div>
+        <button id="checkout-btn" class="btn btn-primary btn-block">Proceed to checkout</button>
+      </div>
+    </main>
+
+    <!-- CHECKOUT VIEW -->
+    <main id="view-checkout" class="view hidden">
+      <h2 class="view-title">Checkout</h2>
+      <div id="checkout-items" class="order-lines"></div>
+      <div class="card">
+        <div class="card-title">Pay with</div>
+        <div class="seg" id="currency-seg">
+          <button data-currency="USD" class="seg-btn active">USD $</button>
+          <button data-currency="KHR" class="seg-btn">KHR ៛</button>
+        </div>
+        <div class="summary-row big"><span>Total</span><span id="checkout-total"></span></div>
+        <p class="hint">PayWay KHQR — scan the code with any banking app.</p>
+      </div>
+      <button id="pay-btn" class="btn btn-primary btn-block">Pay</button>
+    </main>
+
+    <!-- PAYMENT VIEW -->
+    <main id="view-payment" class="view hidden">
+      <div id="test-badge" class="test-badge hidden">TEST MODE</div>
+      <h2 class="view-title">Scan to pay</h2>
+      <div class="card center">
+        <img id="pay-qr" class="qr" alt="KHQR payment code" />
+        <div id="pay-amount" class="pay-amount"></div>
+        <div id="pay-countdown" class="countdown"></div>
+        <div class="btn-row">
+          <a id="pay-deeplink" class="btn btn-secondary hidden" href="#" target="_blank" rel="noopener">Open in ABA app</a>
+          <button id="check-status-btn" class="btn btn-primary">I've paid — check status</button>
+        </div>
+        <p class="hint">Checking automatically every few seconds…</p>
+      </div>
+      <button id="cancel-order-btn" class="btn btn-ghost btn-block">Cancel order</button>
+    </main>
+
+    <!-- SUCCESS VIEW -->
+    <main id="view-success" class="view hidden">
+      <div class="success-hero">✅</div>
+      <h2 class="view-title center">Payment received!</h2>
+      <p class="hint center">Here are your products:</p>
+      <div id="success-delivery" class="delivery"></div>
+      <button id="success-orders-btn" class="btn btn-secondary btn-block">View my orders</button>
+      <button id="success-shop-btn" class="btn btn-ghost btn-block">Back to shop</button>
+    </main>
+
+    <!-- ORDERS VIEW -->
+    <main id="view-orders" class="view hidden">
+      <h2 class="view-title">My orders</h2>
+      <div id="orders-list"></div>
+    </main>
+
+    <!-- Bottom tab bar -->
+    <nav id="tabs">
+      <button class="tab active" data-view="shop">🏠<span>Shop</span></button>
+      <button class="tab" data-view="cart">🧺<span>Cart</span><span id="tab-cart-badge" class="badge hidden">0</span></button>
+      <button class="tab" data-view="orders">📦<span>Orders</span></button>
+    </nav>
+  </div>
+
+  <!-- Product detail modal -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div id="product-modal" class="modal-sheet">
+      <button id="modal-close" class="modal-x" aria-label="Close">✕</button>
+      <img id="modal-img" class="modal-img" alt="Product image" />
+      <div class="modal-body">
+        <div id="modal-category" class="tag"></div>
+        <h3 id="modal-name"></h3>
+        <p id="modal-desc" class="desc"></p>
+        <p id="modal-delivery" class="delivery-hint"></p>
+        <div class="modal-foot">
+          <div class="stepper">
+            <button id="modal-dec" class="step-btn">−</button>
+            <span id="modal-qty">1</span>
+            <button id="modal-inc" class="step-btn">+</button>
+          </div>
+          <div id="modal-price" class="modal-price"></div>
+          <button id="modal-add" class="btn btn-primary">Add to cart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order detail modal (delivery reveal) -->
+  <div id="order-overlay" class="modal-overlay hidden">
+    <div class="modal-sheet">
+      <button id="order-close" class="modal-x" aria-label="Close">✕</button>
+      <div class="modal-body">
+        <h3 id="order-title"></h3>
+        <div id="order-delivery" class="delivery"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

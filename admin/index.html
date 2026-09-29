@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini-Shop Admin</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- Token gate -->
+<div id="tokenGate" class="gate hidden">
+  <div class="gate-card">
+    <div class="gate-logo">&#128722;</div>
+    <h1>Mini-Shop Admin</h1>
+    <p>Enter your admin token to continue.</p>
+    <input type="password" id="tokenInput" placeholder="Admin token" autocomplete="off" spellcheck="false">
+    <button id="tokenBtn" class="btn btn-primary btn-block">Sign in</button>
+    <p class="gate-error" id="gateError"></p>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="brand"><span class="brand-icon">&#128722;</span> <span id="shopName">Mini-Shop</span> <span class="admin-tag">Admin</span></div>
+  <nav class="tabs">
+    <button data-tab="dashboard" class="active">Dashboard</button>
+    <button data-tab="products">Products</button>
+    <button data-tab="keys">Key pools</button>
+    <button data-tab="orders">Orders</button>
+    <button data-tab="import">Import</button>
+    <button data-tab="settings">Settings</button>
+  </nav>
+  <button id="logoutBtn" class="btn btn-ghost">Log out</button>
+</header>
+
+<main class="container">
+
+  <!-- Dashboard -->
+  <section id="tab-dashboard" class="tab-panel active">
+    <h2>Dashboard</h2>
+    <div class="stat-grid" id="statGrid">
+      <div class="stat-card"><div class="stat-label">Products</div><div class="stat-value" id="statProducts">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Pending orders</div><div class="stat-value" id="statPending">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Paid orders</div><div class="stat-value" id="statPaid">&mdash;</div></div>
+      <div class="stat-card"><div class="stat-label">Revenue (USD)</div><div class="stat-value" id="statRevenue">&mdash;</div></div>
+    </div>
+    <p class="muted">Overview of your shop at a glance. Manage products, keys, orders and imports from the tabs above.</p>
+  </section>
+
+  <!-- Products -->
+  <section id="tab-products" class="tab-panel">
+    <div class="panel-head">
+      <h2>Products</h2>
+      <button id="addProductBtn" class="btn btn-primary">+ Add product</button>
+    </div>
+    <div class="table-wrap">
+      <table class="table" id="productsTable">
+        <thead>
+          <tr><th>Name</th><th>Category</th><th>Price</th><th>Type</th><th>Keys avail.</th><th>Active</th><th>Actions</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="muted empty-note" id="productsEmpty" hidden>No products yet. Add one or use the Import tab.</p>
+    </div>
+  </section>
+
+  <!-- Key pools -->
+  <section id="tab-keys" class="tab-panel">
+    <h2>Key pools</h2>
+    <div class="form-row">
+      <label class="field" style="max-width:420px">
+        <span>Product (key delivery only)</span>
+        <select id="keyProductSelect"></select>
+      </label>
+    </div>
+    <div class="table-wrap">
+      <table class="table" id="keysTable">
+        <thead><tr><th>Key</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="muted empty-note" id="keysEmpty" hidden>No keys in this pool yet.</p>
+    </div>
+    <div class="card">
+      <h3>Add keys</h3>
+      <p class="muted">Paste one key per line. Blank lines and duplicates are ignored.</p>
+      <textarea id="keysTextarea" rows="6" placeholder="SAMPLE-XXXX-XXXX-XXXX&#10;SAMPLE-YYYY-YYYY-YYYY"></textarea>
+      <button id="addKeysBtn" class="btn btn-primary">Add keys</button>
+    </div>
+  </section>
+
+  <!-- Orders -->
+  <section id="tab-orders" class="tab-panel">
+    <div class="panel-head">
+      <h2>Orders</h2>
+      <label class="field inline-field">
+        <span>Status</span>
+        <select id="orderFilter">
+          <option value="">All</option>
+          <option value="pending" selected>Pending</option>
+          <option value="paid">Paid</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </label>
+    </div>
+    <div class="table-wrap">
+      <table class="table" id="ordersTable">
+        <thead>
+          <tr><th>#</th><th>Customer</th><th>Items</th><th>Total</th><th>PayWay tran.</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="muted empty-note" id="ordersEmpty" hidden>No orders with this status.</p>
+    </div>
+    <p class="muted">Click a row to expand delivery details.</p>
+  </section>
+
+  <!-- Import -->
+  <section id="tab-import" class="tab-panel">
+    <h2>Import products (CSV)</h2>
+    <div class="card">
+      <p class="muted">Expected columns (header row required):<br>
+        <code>name, price_usd, category, description, delivery_type, delivery_payload, image_url</code></p>
+      <p class="muted"><code>delivery_payload</code> is a JSON string (e.g. <code>{"url":"https://..."}</code>) for
+        <code>download</code> products, or plain instructions text for <code>subscription</code>/<code>text</code>.
+        Leave it empty for <code>key</code> products and add keys in the Key pools tab.</p>
+      <div class="form-row">
+        <input type="file" id="csvFile" accept=".csv,text/csv">
+        <button id="importBtn" class="btn btn-primary">Upload &amp; import</button>
+      </div>
+      <p id="importResult" class="import-result" hidden></p>
+    </div>
+  </section>
+
+  <!-- Settings -->
+  <section id="tab-settings" class="tab-panel">
+    <div class="panel-head">
+      <h2>Settings</h2>
+      <div>
+        <button id="addSettingBtn" class="btn btn-secondary">+ Add setting</button>
+        <button id="saveSettingsBtn" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+    <div class="notice">
+      Public display settings live here (e.g. <code>exchange_rate_usd_khr</code>, <code>shop_name</code>).
+      Secrets (PayWay API keys, the admin token) live in the server <code>.env</code> file, not here.
+    </div>
+    <div class="table-wrap">
+      <table class="table" id="settingsTable">
+        <thead><tr><th>Key</th><th>Value</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- Product modal -->
+<div id="productModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="productModalTitle">Add product</h3>
+      <button class="modal-close" id="productModalClose" aria-label="Close">&times;</button>
+    </div>
+    <form id="productForm">
+      <input type="hidden" id="pfId">
+      <div class="form-grid">
+        <label class="field"><span>Name *</span><input id="pfName" required maxlength="200"></label>
+        <label class="field"><span>Slug</span><input id="pfSlug" maxlength="80" placeholder="auto-generated"></label>
+        <label class="field full"><span>Description</span><textarea id="pfDescription" rows="3"></textarea></label>
+        <label class="field"><span>Price (USD) *</span><input id="pfPrice" type="number" min="0" step="0.01" required></label>
+        <label class="field"><span>Category</span><input id="pfCategory" list="categoryList" maxlength="80"><datalist id="categoryList"></datalist></label>
+        <label class="field full"><span>Image URL</span><input id="pfImage" type="url" placeholder="https://…"></label>
+        <label class="field"><span>Delivery type</span>
+          <select id="pfType">
+            <option value="key">key — license key from pool</option>
+            <option value="download">download — file URL</option>
+            <option value="subscription">subscription — instructions</option>
+            <option value="text">text — instructions</option>
+          </select>
+        </label>
+        <label class="field checkbox-field"><span>Active</span><input id="pfActive" type="checkbox" checked></label>
+        <label class="field full"><span>Delivery payload</span><textarea id="pfPayload" rows="3"></textarea>
+          <small class="hint" id="payloadHint"></small></label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="productModalCancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+{"dependencies":{"better-sqlite3":"^13.0.3","express":"^4.21.2","multer":"2.4.0"},"description":"Telegram mini-shop: digital goods storefront with PayWay KHQR payments","engines":{"node":">=18"},"main":"backend/server.js","name":"tg-minishop","private":true,"scripts":{"seed":"node scripts/seed.js","start":"node backend/server.js"},"version":"1.0.0"}
